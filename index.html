@@ -11,16 +11,16 @@
     <style>
         body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* ★ 3단 카테고리 영역 스타일 개선 ★ */
+        /* 4단 카테고리 영역 스타일 */
         #top-half { background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; flex-shrink: 0; }
         
         .cat-row { display: flex; overflow-x: auto; white-space: nowrap; padding: 12px 15px; align-items: center; scroll-behavior: smooth; }
-        .cat-row::-webkit-scrollbar { display: none; } /* 모바일에서 보기 싫은 스크롤바 숨김 */
+        .cat-row::-webkit-scrollbar { display: none; }
         
-        /* 뎁스(깊이)에 따른 배경색 구분 */
         #row-l1 { background-color: #ffffff; }
         #row-l2 { background-color: #fafafa; border-top: 1px solid #f0f0f0; }
         #row-l3 { background-color: #f4f4f4; border-top: 1px solid #e8e8e8; }
+        #row-l4 { background-color: #ededed; border-top: 1px solid #e0e0e0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
 
         .cat-btn { display: inline-block; padding: 8px 18px; margin-right: 8px; border: 1px solid #ddd; border-radius: 20px; background-color: white; color: #666; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; flex-shrink: 0; }
         .cat-btn.active { background-color: #4e54c8; border-color: #4e54c8; color: white; }
@@ -43,7 +43,6 @@
         
         .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #aaa; }
         
-        /* 빈 화면 안내용 텍스트 */
         .empty-state { text-align: center; padding: 40px 20px; color: #aaa; font-size: 14px; line-height: 1.6; }
     </style>
 </head>
@@ -53,6 +52,7 @@
         <div id="row-l1" class="cat-row"></div>
         <div id="row-l2" class="cat-row" style="display:none;"></div>
         <div id="row-l3" class="cat-row" style="display:none;"></div>
+        <div id="row-l4" class="cat-row" style="display:none;"></div>
     </div>
     
     <div id="bottom-half">
@@ -71,7 +71,7 @@
     </div>
 
     <script>
-        // ★ 여기에 자기의 웹 firebaseConfig를 꼭 넣어줘! ★
+        // ★ 파이어베이스 키 (변경 금지) ★
         const firebaseConfig = {
             apiKey: "자기의_웹_API_KEY",
             authDomain: "study-ea9a0.firebaseapp.com",
@@ -89,8 +89,6 @@
         let appData = { categories: [], data: [] };
         let currentHTMLAudio = null;
         let currentItem = null;
-        
-        // ★ 현재 선택된 폴더 경로를 배열로 저장 (예: ["패턴회화", "인사", "04-12"]) ★
         let selectedPath = [];
 
         database.ref('/').once('value').then((snapshot) => {
@@ -101,41 +99,36 @@
             }
         });
 
-        // ★ 3단 폴더 렌더링 핵심 로직 ★
         function renderCategories() {
             const row1 = document.getElementById('row-l1');
             const row2 = document.getElementById('row-l2');
             const row3 = document.getElementById('row-l3');
+            const row4 = document.getElementById('row-l4');
 
-            row1.innerHTML = ''; row2.innerHTML = ''; row3.innerHTML = '';
-            row2.style.display = 'none'; row3.style.display = 'none';
+            row1.innerHTML = ''; row2.innerHTML = ''; row3.innerHTML = ''; row4.innerHTML = '';
+            row2.style.display = 'none'; row3.style.display = 'none'; row4.style.display = 'none';
 
-            // 1단 (최상위 폴더) 추출
             let l1Set = new Set();
             appData.categories.forEach(c => l1Set.add(c.split('/')[0]));
             let l1Arr = Array.from(l1Set).sort();
             
-            // "기본" 폴더가 있으면 무조건 맨 앞으로
             if (l1Arr.includes("기본")) {
                 l1Arr = ["기본", ...l1Arr.filter(c => c !== "기본")];
             }
 
-            // 앱 켰을 때 기본 선택 설정
             if (selectedPath.length === 0 && l1Arr.length > 0) {
                 selectedPath = ["기본"];
             }
 
-            // 1단 렌더링
             l1Arr.forEach(cat => {
                 const isActive = (selectedPath[0] === cat);
                 const btn = createBtn(cat, isActive, () => {
-                    selectedPath = [cat]; // 하위 폴더 선택 초기화
+                    selectedPath = [cat]; 
                     renderCategories();
                 });
                 row1.appendChild(btn);
             });
 
-            // 2단 (중간 폴더) 추출 및 렌더링
             if (selectedPath.length >= 1) {
                 let l2Set = new Set();
                 appData.categories.forEach(c => {
@@ -151,7 +144,7 @@
                     l2Arr.forEach(cat => {
                         const isActive = (selectedPath.length >= 2 && selectedPath[1] === cat);
                         const btn = createBtn(cat, isActive, () => {
-                            selectedPath = [selectedPath[0], cat]; // 3단 폴더 선택 초기화
+                            selectedPath = [selectedPath[0], cat];
                             renderCategories();
                         });
                         row2.appendChild(btn);
@@ -159,7 +152,6 @@
                 }
             }
 
-            // 3단 (최하위 폴더/날짜) 추출 및 렌더링
             if (selectedPath.length >= 2) {
                 let l3Set = new Set();
                 appData.categories.forEach(c => {
@@ -183,12 +175,33 @@
                 }
             }
 
-            // 선택된 전체 경로 문자열 생성 후 문장 렌더링
+            if (selectedPath.length >= 3) {
+                let l4Set = new Set();
+                appData.categories.forEach(c => {
+                    const parts = c.split('/');
+                    if (parts[0] === selectedPath[0] && parts[1] === selectedPath[1] && parts[2] === selectedPath[2] && parts.length > 3) {
+                        l4Set.add(parts[3]);
+                    }
+                });
+                let l4Arr = Array.from(l4Set).sort();
+
+                if (l4Arr.length > 0) {
+                    row4.style.display = 'flex';
+                    l4Arr.forEach(cat => {
+                        const isActive = (selectedPath.length >= 4 && selectedPath[3] === cat);
+                        const btn = createBtn(cat, isActive, () => {
+                            selectedPath = [selectedPath[0], selectedPath[1], selectedPath[2], cat];
+                            renderCategories();
+                        });
+                        row4.appendChild(btn);
+                    });
+                }
+            }
+
             const currentTargetCat = selectedPath.join('/');
             renderSentences(currentTargetCat);
         }
 
-        // 버튼 생성 헬퍼 함수
         function createBtn(text, isActive, onClick) {
             const btn = document.createElement('button');
             btn.className = 'cat-btn' + (isActive ? ' active' : '');
@@ -197,14 +210,12 @@
             return btn;
         }
 
-        // 문장 리스트 렌더링
         function renderSentences(category) {
             const container = document.getElementById('sentence-container');
             container.innerHTML = '';
             
             const filtered = appData.data.filter(item => item.cat === category);
             
-            // ★ 선택한 폴더에 문장이 없을 경우 친절한 안내 표시 ★
             if (filtered.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     이 폴더에는 직접 저장된 문장이 없습니다.<br>
@@ -272,22 +283,37 @@
             }
         }
 
+        // ★ 버그 수정: 모바일 AI 음성 엔진 완벽 인식 로직 ★
         function playAIVoice(text, langCode) {
             if (!window.speechSynthesis) return;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = langCode;
             utterance.rate = 0.9;
 
-            const voices = window.speechSynthesis.getVoices();
-            const selectedVoice = voices.find(v => v.lang.includes(langCode));
+            let voices = window.speechSynthesis.getVoices();
+            const shortLang = langCode.split('-')[0]; // 'fr' 또는 'ko'
+            
+            // 1순위: fr-FR, fr_FR 완벽 일치 찾기
+            // 2순위: 앞글자가 'fr'로 시작하는 목소리라도 무조건 끌어오기
+            const selectedVoice = voices.find(v => v.lang.replace('_', '-').toLowerCase().includes(langCode.toLowerCase())) 
+                               || voices.find(v => v.lang.toLowerCase().startsWith(shortLang));
 
             if (selectedVoice) {
                 utterance.voice = selectedVoice;
-            } else if (langCode.includes('ko')) {
-                alert("Attention Gaël! \n\nVotre téléphone n'a pas de 'données vocales coréennes'. \n\nAllez dans: Réglages -> Accessibilité -> Contenu lu -> Voix -> Coréen (télécharger).");
-                return;
+            } else {
+                // 스마트폰에 해당 언어팩이 아예 없을 때의 친절한 안내
+                if (shortLang === 'fr') {
+                    alert("자기야! 스마트폰에 '프랑스어 TTS(음성 읽기)' 데이터가 없어서 기본 목소리로 나오는 중이야.\n\n[해결법]\n설정 -> 일반 -> 텍스트 음성 변환(TTS) 설정에서 '프랑스어' 음성 데이터를 다운로드해 줘!");
+                } else if (shortLang === 'ko') {
+                    alert("Attention Gaël! \nVotre téléphone n'a pas de voix coréenne. \nVeuillez la télécharger dans les paramètres de votre téléphone.");
+                }
             }
             window.speechSynthesis.speak(utterance);
+        }
+
+        // 모바일 브라우저 렌더링 버그 방지용 음성 미리 로딩
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
         }
         window.speechSynthesis.getVoices();
     </script>

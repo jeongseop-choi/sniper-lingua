@@ -3,309 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sniper Lingua Mobile</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    
+    <title>Sniper Lingua Mobile (Guena Special)</title>
     <style>
-        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        /* 기본 폰트 및 배경 세팅 */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f5f6fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        #top-half { background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 10; display: flex; flex-direction: column; flex-shrink: 0; }
-        
-        .cat-row { display: flex; overflow-x: auto; white-space: nowrap; padding: 12px 15px; align-items: center; scroll-behavior: smooth; }
-        .cat-row::-webkit-scrollbar { display: none; }
-        
-        #row-l1 { background-color: #ffffff; }
-        #row-l2 { background-color: #fafafa; border-top: 1px solid #f0f0f0; }
-        #row-l3 { background-color: #f4f4f4; border-top: 1px solid #e8e8e8; }
-        #row-l4 { background-color: #ededed; border-top: 1px solid #e0e0e0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        /* 팝업 뒷배경 (어둡게 처리) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
 
-        .cat-btn { display: inline-block; padding: 8px 18px; margin-right: 8px; border: 1px solid #ddd; border-radius: 20px; background-color: white; color: #666; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; flex-shrink: 0; }
-        .cat-btn.active { background-color: #4e54c8; border-color: #4e54c8; color: white; }
-        
-        #bottom-half { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 50px; }
-        .sentence-card { background: white; padding: 20px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); display: flex; flex-direction: column; cursor: pointer; border: 1px solid #f0f0f0; -webkit-tap-highlight-color: transparent; }
-        .list-ko { font-size: 13px; color: #888; margin-bottom: 5px; }
-        .list-fr { font-size: 16px; font-weight: bold; color: #333; }
-        
-        #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
-        #modal-box { background: white; width: 85%; max-width: 400px; border-radius: 20px; padding: 30px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; position: relative; }
-        
-        .modal-ko { font-size: 16px; color: #666; margin-bottom: 15px; }
-        .modal-fr { font-size: 24px; font-weight: bold; color: #2c3e50; margin-bottom: 30px; line-height: 1.3; }
-        
-        .play-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 15px 0; margin-bottom: 10px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; color: white; cursor: pointer; }
+        /* 하얀색 팝업창 본체 */
+        .modal-content {
+            background: white;
+            width: 90%; max-width: 400px;
+            border-radius: 20px;
+            padding: 35px 20px 25px 20px;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        /* 우측 상단 닫기 X 버튼 */
+        .close-btn {
+            position: absolute; top: 15px; right: 15px;
+            background: none; border: none; font-size: 22px; color: #aaa;
+            cursor: pointer; transition: color 0.2s;
+        }
+        .close-btn:active { color: #555; }
+
+        /* 한국어 텍스트 (작은 회색) */
+        .text-ko {
+            color: #7f8c8d; font-size: 15px; line-height: 1.6; margin-bottom: 20px;
+            word-break: keep-all; font-weight: 500;
+        }
+
+        /* 프랑스어 텍스트 (크고 굵은 남색) */
+        .text-fr {
+            color: #2c3e50; font-size: 24px; font-weight: 800; line-height: 1.4; margin-bottom: 35px;
+            word-break: keep-all;
+        }
+
+        /* 버튼들 모아두는 곳 */
+        .btn-group {
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        /* 버튼 공통 디자인 */
+        .btn {
+            width: 100%; padding: 16px; border-radius: 12px; border: none;
+            font-size: 17px; font-weight: 700; color: white; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            transition: transform 0.1s ease-in-out;
+        }
+        .btn:active { transform: scale(0.97); } /* 누를 때 쫀득하게 눌리는 효과 */
+
+        /* 프랑스어 버튼 색상 */
         .btn-fr { background-color: #4e54c8; }
-        .btn-ko { background-color: #ff5f57; }
-        .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; margin-left: 10px; background: rgba(0,0,0,0.1); }
         
-        .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; color: #aaa; }
-        
-        .empty-state { text-align: center; padding: 40px 20px; color: #aaa; font-size: 14px; line-height: 1.6; }
+        /* 한국어 버튼 색상 */
+        .btn-ko { background-color: #e74c3c; }
+
+        /* [AI] 동그란 뱃지 */
+        .badge-ai {
+            background: rgba(255,255,255,0.25); font-size: 11px;
+            padding: 3px 7px; border-radius: 10px; margin-left: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="top-half">
-        <div id="row-l1" class="cat-row"></div>
-        <div id="row-l2" class="cat-row" style="display:none;"></div>
-        <div id="row-l3" class="cat-row" style="display:none;"></div>
-        <div id="row-l4" class="cat-row" style="display:none;"></div>
-    </div>
-    
-    <div id="bottom-half">
-        <div id="loading-area" style="text-align:center; padding:20px;">Chargement... 🚀</div>
-        <div id="sentence-container"></div>
-    </div>
-
-    <div id="modal-overlay" onclick="closeModal(event)">
-        <div id="modal-box" onclick="event.stopPropagation()">
-            <button class="close-btn" onclick="closeModal(true)">✕</button>
-            <div class="modal-ko" id="pop-ko"></div>
-            <div class="modal-fr" id="pop-fr"></div>
-            <button class="play-btn btn-fr" onclick="playAudio('fr')">
-                <span id="label-fr">🇫🇷 Français</span> <span class="status-badge" id="badge-fr"></span>
-            </button>
-            <button class="play-btn btn-ko" onclick="playAudio('ko')">
-                <span id="label-ko">🇰🇷 Coréen</span> <span class="status-badge" id="badge-ko"></span>
-            </button>
+    <div class="modal-overlay" id="wordModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">✕</button>
+            
+            <div class="text-ko" id="textKo">
+                십일, 십이, 십삼, 십사, 십오, 십육, 십칠, 십팔, 십구, 이십
+            </div>
+            
+            <div class="text-fr" id="textFr">
+                onze, douze, treize, quatorze, quinze, seize, dix-sept, dix-huit, dix-neuf, vingt
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-fr" onclick="playAIVoice('fr')">
+                    🇫🇷 프랑스어 <span class="badge-ai">AI</span>
+                </button>
+                
+                <button class="btn btn-ko" onclick="playAIVoice('ko')">
+                    🇰🇷 한국어 <span class="badge-ai">AI</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ★ 파이어베이스 설정 (본인의 정보로 유지하세요) ★
-        const firebaseConfig = {
-            apiKey: "자기의_웹_API_KEY",
-            authDomain: "study-ea9a0.firebaseapp.com",
-            databaseURL: "https://study-ea9a0-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "study-ea9a0",
-            storageBucket: "study-ea9a0.firebasestorage.app",
-            messagingSenderId: "자기의_SENDER_ID",
-            appId: "자기의_APP_ID"
-        };
+        // 전 세계 브라우저의 성우 목소리를 담아둘 빈 바구니
+        let globalVoices = [];
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const storage = firebase.storage();
+        // 1. 성우 데이터 미리 싹 긁어오기 (아이폰 버그 방지 1단계)
+        function loadVoices() {
+            globalVoices = window.speechSynthesis.getVoices();
+        }
 
-        // ★ [새로 추가] UI 다국어 사전 ★
-        const uiStrings = {
-            'ko': {
-                'loading': '서버 데이터 동기화 중... 🚀',
-                'empty': '이 폴더에는 저장된 문장이 없습니다.<br>(하위 폴더가 있다면 선택해주세요!)',
-                'btn_fr': '🇫🇷 프랑스어',
-                'btn_ko': '🇰🇷 한국어',
-                'default_cat': '기본'
-            },
-            'fr': {
-                'loading': 'Synchronisation du serveur... 🚀',
-                'empty': 'Aucune phrase dans ce dossier.<br>(Veuillez sélectionner un sous-dossier !)',
-                'btn_fr': '🇫🇷 Français',
-                'btn_ko': '🇰🇷 Coréen',
-                'default_cat': 'Par défaut'
+        // 아이폰(사파리)이 성우 데이터를 뒤늦게 로딩할 때마다 바구니 새로고침
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        
+        // 페이지 켜지자마자 1회 강제 실행
+        loadVoices();
+
+        // 2. 대망의 AI 음성 재생 함수 (버튼 누르면 발동!)
+        function playAIVoice(langType) {
+            // ★ 먹통 해결의 핵심: 말하기 전에 기존에 목구멍에 막힌 쓰레기 데이터 싹 날리기!
+            window.speechSynthesis.cancel();
+
+            // 텍스트랑 언어 설정 변수 준비
+            let textToSpeak = "";
+            let targetLangCode = "";
+
+            // 누른 버튼에 따라 읽을 내용과 언어 코드를 세팅해 줌
+            if (langType === 'fr') {
+                textToSpeak = document.getElementById('textFr').innerText;
+                targetLangCode = 'fr-FR'; // 프랑스어 규격
+            } else {
+                textToSpeak = document.getElementById('textKo').innerText;
+                targetLangCode = 'ko-KR'; // 한국어 규격
             }
-        };
 
-        // ★ [새로 추가] 접속 브라우저 언어 감지 ★
-        const userBrowserLang = (navigator.language || navigator.userLanguage).toLowerCase();
-        const currentUI = userBrowserLang.startsWith('fr') ? uiStrings['fr'] : uiStrings['ko'];
-
-        // 초기 텍스트 설정
-        document.getElementById('loading-area').innerText = currentUI['loading'];
-        document.getElementById('label-fr').innerText = currentUI['btn_fr'];
-        document.getElementById('label-ko').innerText = currentUI['btn_ko'];
-
-        let appData = { categories: [], data: [] };
-        let currentHTMLAudio = null;
-        let currentItem = null;
-        let selectedPath = [];
-
-        database.ref('/').once('value').then((snapshot) => {
-            document.getElementById('loading-area').style.display = 'none';
-            if(snapshot.exists()) {
-                appData = snapshot.val();
-                renderCategories();
-            }
-        });
-
-        function renderCategories() {
-            const rows = [
-                document.getElementById('row-l1'),
-                document.getElementById('row-l2'),
-                document.getElementById('row-l3'),
-                document.getElementById('row-l4')
-            ];
-
-            rows.forEach((r, idx) => {
-                r.innerHTML = '';
-                if (idx > 0) r.style.display = 'none';
-            });
-
-            // 1단 (최상위)
-            let l1Set = new Set();
-            appData.categories.forEach(c => l1Set.add(c.split('/')[0]));
-            let l1Arr = Array.from(l1Set).sort();
-            
-            // "기본" 폴더 순서 및 이름 처리
-            if (l1Arr.includes("기본")) {
-                l1Arr = ["기본", ...l1Arr.filter(c => c !== "기본")];
-            }
-            if (selectedPath.length === 0 && l1Arr.length > 0) selectedPath = ["기본"];
-
-            l1Arr.forEach(cat => {
-                const isActive = (selectedPath[0] === cat);
-                // 화면 표시용 이름 결정 ('기본' -> 'Par défaut')
-                const displayCat = (cat === "기본") ? currentUI['default_cat'] : cat;
+            // 사파리가 캔슬(취소)을 완벽히 소화할 수 있게 50ms(0.05초) 살짝 뜸을 들여줌
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 
-                const btn = createBtn(displayCat, isActive, () => {
-                    selectedPath = [cat];
-                    renderCategories();
-                });
-                rows[0].appendChild(btn);
-            });
-
-            // 2단~4단 렌더링 로직 (재귀적 반복 대신 직관적으로 확장)
-            for (let depth = 1; depth <= 3; depth++) {
-                if (selectedPath.length >= depth) {
-                    let nextSet = new Set();
-                    appData.categories.forEach(c => {
-                        const parts = c.split('/');
-                        let match = true;
-                        for(let i=0; i<depth; i++) {
-                            if(parts[i] !== selectedPath[i]) match = false;
-                        }
-                        if (match && parts.length > depth) nextSet.add(parts[depth]);
-                    });
-                    let nextArr = Array.from(nextSet).sort();
-
-                    if (nextArr.length > 0) {
-                        rows[depth].style.display = 'flex';
-                        nextArr.forEach(cat => {
-                            const isActive = (selectedPath.length >= depth + 1 && selectedPath[depth] === cat);
-                            const btn = createBtn(cat, isActive, () => {
-                                selectedPath = [...selectedPath.slice(0, depth), cat];
-                                renderCategories();
-                            });
-                            rows[depth].appendChild(btn);
-                        });
+                // 1차적으로 언어 규격 지정
+                utterance.lang = targetLangCode;
+                
+                // ★ 외계인 콧소리 해결의 핵심 ★
+                // 아이폰이 가져온 성우 바구니에서, 억지로 영어 발음하는 애들 치우고 '진짜 원어민'을 멱살 잡고 끌고 옴
+                if (globalVoices.length > 0) {
+                    const matchedVoice = globalVoices.find(voice => 
+                        voice.lang.includes(targetLangCode) || voice.lang.includes(langType)
+                    );
+                    
+                    if (matchedVoice) {
+                        utterance.voice = matchedVoice; // 원어민 배정 완료!
                     }
                 }
-            }
+                
+                // 말하기 속도랑 피치 (너무 빠르거나 로봇 같지 않게 정방향 1.0으로 고정)
+                utterance.rate = 1.0; 
+                utterance.pitch = 1.0;
 
-            const currentTargetCat = selectedPath.join('/');
-            renderSentences(currentTargetCat);
+                // 드디어 스피커로 발사!
+                window.speechSynthesis.speak(utterance);
+            }, 50);
         }
 
-        function createBtn(text, isActive, onClick) {
-            const btn = document.createElement('button');
-            btn.className = 'cat-btn' + (isActive ? ' active' : '');
-            btn.innerText = "📂 " + text;
-            btn.onclick = onClick;
-            return btn;
+        // 창 닫기 버튼 누르면 실행되는 함수
+        function closeModal() {
+            document.getElementById('wordModal').style.display = 'none';
+            // 창 닫을 때 AI가 떠들던 것도 매너 있게 멈추게 하는 센스!
+            window.speechSynthesis.cancel(); 
         }
-
-        function renderSentences(category) {
-            const container = document.getElementById('sentence-container');
-            container.innerHTML = '';
-            
-            const filtered = appData.data.filter(item => item.cat === category);
-            
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="empty-state">${currentUI['empty']}</div>`;
-                return;
-            }
-
-            filtered.forEach(item => {
-                const isKo = /[가-힣]/.test(item.text);
-                const koTxt = isKo ? item.text : item.trans;
-                const frTxt = isKo ? item.trans : item.text;
-                const card = document.createElement('div');
-                card.className = 'sentence-card';
-                card.innerHTML = `<div class="list-ko">${koTxt}</div><div class="list-fr">${frTxt}</div>`;
-                card.onclick = () => openModal(item, koTxt, frTxt);
-                container.appendChild(card);
-            });
-        }
-
-        function openModal(item, koTxt, frTxt) {
-            currentItem = item;
-            document.getElementById('pop-ko').innerText = koTxt;
-            document.getElementById('pop-fr').innerText = frTxt;
-            const isKo = /[가-힣]/.test(item.text);
-            
-            // 뱃지 텍스트도 언어 감지 (Voix / 음성)
-            const badgeVoice = userBrowserLang.startsWith('fr') ? "Voix" : "음성";
-            document.getElementById('badge-ko').innerText = (isKo ? item.in_file : item.out_file) ? badgeVoice : "AI";
-            document.getElementById('badge-fr').innerText = (isKo ? item.out_file : item.in_file) ? badgeVoice : "AI";
-            document.getElementById('modal-overlay').style.display = 'flex';
-        }
-
-        function closeModal(force = false) {
-            if(force || (event && event.target.id === 'modal-overlay')) {
-                document.getElementById('modal-overlay').style.display = 'none';
-                stopAllAudio();
-            }
-        }
-
-        function stopAllAudio() {
-            if (currentHTMLAudio) { currentHTMLAudio.pause(); currentHTMLAudio.currentTime = 0; }
-            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
-        }
-
-        function playAudio(targetLang) {
-            stopAllAudio();
-            const isKo = /[가-힣]/.test(currentItem.text);
-            let playText, fileName, aiLangCode;
-
-            if (targetLang === 'ko') {
-                playText = isKo ? currentItem.text : currentItem.trans;
-                fileName = isKo ? currentItem.in_file : currentItem.out_file;
-                aiLangCode = 'ko-KR';
-            } else {
-                playText = isKo ? currentItem.trans : currentItem.text;
-                fileName = isKo ? currentItem.out_file : currentItem.in_file;
-                aiLangCode = 'fr-FR';
-            }
-
-            if (fileName) {
-                storage.ref(fileName).getDownloadURL().then((url) => {
-                    currentHTMLAudio = new Audio(url);
-                    currentHTMLAudio.play();
-                }).catch(() => playAIVoice(playText, aiLangCode));
-            } else {
-                playAIVoice(playText, aiLangCode);
-            }
-        }
-
-        function playAIVoice(text, langCode) {
-            if (!window.speechSynthesis) return;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = langCode;
-            utterance.rate = 0.9;
-
-            let voices = window.speechSynthesis.getVoices();
-            const shortLang = langCode.split('-')[0]; 
-            
-            const selectedVoice = voices.find(v => v.lang.replace('_', '-').toLowerCase().includes(langCode.toLowerCase())) 
-                               || voices.find(v => v.lang.toLowerCase().startsWith(shortLang));
-
-            if (selectedVoice) {
-                utterance.voice = selectedVoice;
-            } else {
-                if (shortLang === 'fr') {
-                    alert("Attention! \nDonnées vocales françaises non trouvées. Veuillez les télécharger dans les paramètres.");
-                } else if (shortLang === 'ko') {
-                    alert("Attention Gaël! \nVotre téléphone n'a pas de voix coréenne. \nVeuillez la télécharger dans les paramètres.");
-                }
-            }
-            window.speechSynthesis.speak(utterance);
-        }
-
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
-        }
-        window.speechSynthesis.getVoices();
     </script>
 </body>
 </html>

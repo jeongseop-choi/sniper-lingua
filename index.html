@@ -12,6 +12,7 @@
             --bg-color: #f4f7f6;
             --text-color: #333;
             --card-bg: #ffffff;
+            --loop-active: #9b59b6;
         }
         * { box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 0; }
         body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 50px; }
@@ -44,60 +45,75 @@
             border-bottom: 1px dashed #eee;
         }
         .category-row::-webkit-scrollbar { display: none; }
-        .category-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         
         .cat-btn {
             background-color: #f0f0f0; border: none; color: #555;
             padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold;
             white-space: nowrap; cursor: pointer; transition: all 0.2s;
         }
-        .cat-btn.active {
-            background-color: var(--primary-color); color: white;
-            box-shadow: 0 2px 5px rgba(78, 84, 200, 0.4);
-        }
+        .cat-btn.active { background-color: var(--primary-color); color: white; }
 
         .list-container { padding: 0 15px; }
         .sentence-card {
-            background: var(--card-bg); padding: 15px; margin-bottom: 12px;
-            border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background: var(--card-bg); padding: 18px; margin-bottom: 12px;
+            border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: transform 0.1s;
+            cursor: pointer;
         }
-        .sentence-card:active { transform: scale(0.98); }
-        .text-area { flex-grow: 1; padding-right: 10px; }
-        .fr-text { font-size: 16px; font-weight: bold; color: var(--primary-color); margin-bottom: 4px; }
-        .ko-text { font-size: 14px; color: #666; }
+        .fr-text { font-size: 17px; font-weight: bold; color: var(--primary-color); margin-bottom: 4px; }
+        .ko-text { font-size: 15px; color: #666; }
         
-        .badge-container { display: flex; flex-direction: column; gap: 5px; min-width: 60px; text-align: right; }
-        .badge { font-size: 10px; padding: 4px 6px; border-radius: 4px; font-weight: bold; text-align: center; }
-        .badge-native { background-color: #2ecc71; color: white; }
-        .badge-ai { background-color: #f1c40f; color: #333; }
+        /* 리스트 배지 스타일 */
+        .badge-container { display: flex; flex-direction: column; gap: 4px; min-width: 65px; text-align: right; }
+        .badge { font-size: 10px; padding: 3px 5px; border-radius: 4px; font-weight: bold; color: white; display: inline-block; width: 60px; text-align: center; }
+        .badge-native { background-color: #2ecc71; } /* 원어민: 초록색 */
+        .badge-ai { background-color: #f1c40f; color: #333; } /* AI: 노란색 */
 
+        /* 모달 스타일 */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); display: none;
             justify-content: center; align-items: center; z-index: 1000;
         }
         .modal-content {
-            background: white; width: 85%; max-width: 400px;
-            border-radius: 20px; padding: 25px; text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: white; width: 90%; max-width: 420px;
+            border-radius: 25px; padding: 30px 20px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         }
-        .modal-fr { font-size: 22px; font-weight: bold; color: var(--primary-color); margin-bottom: 10px; }
-        .modal-ko { font-size: 18px; color: #555; margin-bottom: 25px; }
+        
+        .btn-row { display: flex; gap: 10px; margin-bottom: 15px; height: 65px; }
         
         .play-btn {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            width: 100%; padding: 15px; margin-bottom: 10px; border: none;
-            border-radius: 12px; font-size: 16px; font-weight: bold;
-            cursor: pointer; color: white;
+            flex: 4; display: flex; align-items: center; justify-content: center;
+            padding: 0 15px; border: none; border-radius: 15px;
+            cursor: pointer; color: white; transition: transform 0.1s;
         }
         .btn-fr { background-color: #3498db; }
-        .btn-ko { background-color: #e74c3c; }
-        .btn-close { background-color: #95a5a6; margin-top: 15px; }
+        .btn-ko { background-color: #e67e22; }
+        
+        .btn-lang { font-size: 14px; font-weight: bold; opacity: 0.9; margin-right: auto; }
+        .btn-listen { font-size: 20px; font-weight: 800; flex-grow: 1; text-align: center; }
+        .btn-source { font-size: 14px; font-weight: bold; opacity: 0.9; margin-left: auto; }
+
+        .loop-btn {
+            flex: 1; border: 2px solid #eee; background: white;
+            border-radius: 15px; font-size: 22px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #ccc; transition: all 0.2s;
+        }
+        .loop-btn.active {
+            border-color: var(--loop-active);
+            color: var(--loop-active);
+            background-color: #f9f0ff;
+        }
+
+        .btn-close { 
+            background-color: #95a5a6; width: 100%; padding: 15px; 
+            border: none; border-radius: 15px; color: white; 
+            font-size: 18px; font-weight: bold; margin-top: 10px; 
+        }
         
         #loader { text-align: center; padding: 30px; font-weight: bold; color: #888; }
-        .empty-msg { text-align: center; padding: 20px; color: #888; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -114,11 +130,28 @@
 
     <div class="modal-overlay" id="audio-modal">
         <div class="modal-content">
-            <div class="modal-fr" id="modal-text-fr"></div>
-            <div class="modal-ko" id="modal-text-ko"></div>
-            <button class="play-btn btn-fr" onclick="playAudio('fr')">🇫🇷 <span id="btn-text-fr"></span></button>
-            <button class="play-btn btn-ko" onclick="playAudio('ko')">🇰🇷 <span id="btn-text-ko"></span></button>
-            <button class="play-btn btn-close" onclick="closeModal()" id="btn-text-close"></button>
+            <div id="modal-text-fr" style="font-size: 24px; font-weight: bold; color: #4e54c8; margin-bottom: 5px;"></div>
+            <div id="modal-text-ko" style="font-size: 18px; color: #777; margin-bottom: 30px;"></div>
+            
+            <div class="btn-row">
+                <button class="play-btn btn-fr" onclick="playAudio('fr')">
+                    <span class="btn-lang">FR</span>
+                    <span class="btn-listen" id="lt-fr">듣기</span>
+                    <span class="btn-source" id="ls-fr">Original</span>
+                </button>
+                <button class="loop-btn" id="loop-fr" onclick="toggleLoop('fr')">🔁</button>
+            </div>
+
+            <div class="btn-row">
+                <button class="play-btn btn-ko" onclick="playAudio('ko')">
+                    <span class="btn-lang">KR</span>
+                    <span class="btn-listen" id="lt-ko">듣기</span>
+                    <span class="btn-source" id="ls-ko">Original</span>
+                </button>
+                <button class="loop-btn" id="loop-ko" onclick="toggleLoop('ko')">🔁</button>
+            </div>
+
+            <button class="btn-close" onclick="closeModal()">✕ Fermer</button>
         </div>
     </div>
 
@@ -130,11 +163,13 @@
         let catTree = {};
         let currentPath = []; 
         let currentLang = 'fr';
-        let translatedCache = {}; // 번역 속도 향상을 위한 캐시
+        let currentItem = null;
+        let isLooping = { fr: false, ko: false };
+        let translatedCache = {};
 
         const langData = {
-            fr: { subtitle: "La salle d'étude de Guéna et Jeongseop", toggleBtn: "🇰🇷 한국어", empty: "Aucune phrase.", human: "Humain", ai: "AI", play: "Écouter", close: "✕ Fermer" },
-            ko: { subtitle: "게나엘과 정섭이 함께하는 공부방", toggleBtn: "🇫🇷 Français", empty: "문장이 없습니다.", human: "원어민", ai: "AI", play: "듣기", close: "✕ 닫기" }
+            fr: { subtitle: "La salle d'étude de Guéna et Jeongseop", toggleBtn: "🇰🇷 한국어", listen: "Écouter", native: "Original", ai: "AI", badge_n: "FR Human", badge_a: "FR AI" },
+            ko: { subtitle: "게나엘과 정섭이 함께하는 공부방", toggleBtn: "🇫🇷 Français", listen: "듣기", native: "오리지날", ai: "AI", badge_n: "원어민", badge_a: "AI" }
         };
 
         window.onload = async () => {
@@ -150,46 +185,37 @@
             } catch (error) { console.error(error); }
         };
 
-        // ★ 실시간 구글 번역 함수 (무료 API 우회)
         async function translateText(text, target) {
-            if (!text || text.match(/^[a-zA-Z0-9\s]+$/)) return text; // 이미 영문이면 패스
+            if (!text || text.match(/^[a-zA-Z0-9\s?.,!]+$/)) return text;
             const cacheKey = `${text}_${target}`;
             if (translatedCache[cacheKey]) return translatedCache[cacheKey];
-
             try {
                 const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${target}&dt=t&q=${encodeURIComponent(text)}`);
                 const data = await res.json();
-                const translated = data[0][0][0];
-                translatedCache[cacheKey] = translated;
-                return translated;
-            } catch (e) {
-                return text; // 에러 시 원문 반환
-            }
+                return translatedCache[cacheKey] = data[0][0][0];
+            } catch (e) { return text; }
         }
 
         async function toggleLanguage() {
             currentLang = currentLang === 'fr' ? 'ko' : 'fr';
             updateLanguageUI();
-            await renderCategoryLevels(); // 카테고리 실시간 번역 렌더링
+            await renderCategoryLevels(); 
             if (currentPath.length > 0) renderSentences(currentPath.join('/'));
         }
 
         function updateLanguageUI() {
             document.getElementById("app-subtitle").innerText = langData[currentLang].subtitle;
             document.getElementById("lang-toggle-btn").innerText = langData[currentLang].toggleBtn;
-            document.getElementById("btn-text-fr").innerText = langData[currentLang].play;
-            document.getElementById("btn-text-ko").innerText = langData[currentLang].play;
-            document.getElementById("btn-text-close").innerText = langData[currentLang].close;
         }
 
         function buildCategoryTree(categories) {
             catTree = {};
-            categories.forEach(catPath => {
-                let parts = catPath.split('/');
-                let currentLevel = catTree;
+            categories.forEach(path => {
+                let parts = path.split('/');
+                let curr = catTree;
                 parts.forEach(part => {
-                    if (!currentLevel[part]) currentLevel[part] = { _children: {} };
-                    currentLevel = currentLevel[part]._children;
+                    if (!curr[part]) curr[part] = { _children: {} };
+                    curr = curr[part]._children;
                 });
             });
             document.getElementById("loader").style.display = "none";
@@ -198,95 +224,81 @@
         async function renderCategoryLevels() {
             const container = document.getElementById("category-levels");
             container.innerHTML = "";
-            let currentLevelNodes = catTree;
-            let builtPath = [];
-
-            await renderCategoryRow(currentLevelNodes, 0);
-
-            for (let i = 0; i < currentPath.length; i++) {
-                let selectedFolder = currentPath[i];
-                if (currentLevelNodes[selectedFolder]) {
-                    currentLevelNodes = currentLevelNodes[selectedFolder]._children;
-                    if (Object.keys(currentLevelNodes).length > 0) {
-                        await renderCategoryRow(currentLevelNodes, i + 1);
-                    }
+            let curr = catTree;
+            await renderRow(curr, 0);
+            for (let part of currentPath) {
+                if (curr[part]) {
+                    curr = curr[part]._children;
+                    if (Object.keys(curr).length > 0) await renderRow(curr, currentPath.indexOf(part) + 1);
                 }
             }
         }
 
-        async function renderCategoryRow(nodes, depth) {
-            const rowDiv = document.createElement("div");
-            rowDiv.className = "category-row";
-            
-            // 병렬 번역 처리를 위해 프로미스 배열 생성
-            const promises = Object.keys(nodes).map(async (folderName) => {
+        async function renderRow(nodes, depth) {
+            const row = document.createElement("div");
+            row.className = "category-row";
+            const promises = Object.keys(nodes).map(async (name) => {
                 const btn = document.createElement("button");
-                btn.className = "cat-btn";
-                
-                // ★ 실시간 번역 적용 (한글일 때만 프랑스어로, 프랑스어일 때는 그대로)
-                let displayName = folderName;
-                if (currentLang === 'fr') {
-                    displayName = await translateText(folderName, 'fr');
-                } else {
-                    displayName = await translateText(folderName, 'ko');
-                }
-
-                btn.innerText = displayName;
-                if (currentPath[depth] === folderName) btn.classList.add("active");
-                
-                btn.onclick = async () => {
+                btn.className = "cat-btn " + (currentPath[depth] === name ? "active" : "");
+                btn.innerText = (currentLang === 'fr') ? await translateText(name, 'fr') : name;
+                btn.onclick = () => {
                     currentPath = currentPath.slice(0, depth);
-                    currentPath.push(folderName);
-                    await renderCategoryLevels();
+                    currentPath.push(name);
+                    renderCategoryLevels();
                     renderSentences(currentPath.join('/'));
                 };
                 return btn;
             });
-
             const buttons = await Promise.all(promises);
-            buttons.forEach(btn => rowDiv.appendChild(btn));
-            document.getElementById("category-levels").appendChild(rowDiv);
+            buttons.forEach(b => row.appendChild(b));
+            document.getElementById("category-levels").appendChild(row);
         }
 
-        function renderSentences(categoryPath) {
+        function renderSentences(path) {
             const list = document.getElementById("sentence-list");
             list.innerHTML = "";
-            const filteredData = globalData.filter(item => item.cat === categoryPath);
-            if (filteredData.length === 0) {
-                list.innerHTML = `<div class="empty-msg">${langData[currentLang].empty}</div>`;
-                return;
-            }
-            filteredData.forEach((item) => {
+            globalData.filter(item => item.cat === path).forEach(item => {
                 const isKo = /[가-힣]/.test(item.text);
-                const koText = isKo ? item.text : item.trans;
-                const frText = isKo ? item.trans : item.text;
+                const koT = isKo ? item.text : item.trans;
+                const frT = isKo ? item.trans : item.text;
+                
+                const frNative = isKo ? item.out_file : item.in_file;
+                const koNative = isKo ? item.in_file : item.out_file;
+
                 const card = document.createElement("div");
                 card.className = "sentence-card";
                 card.innerHTML = `
-                    <div class="text-area">
-                        <div class="fr-text">${frText}</div>
-                        <div class="ko-text">${koText}</div>
-                    </div>
+                    <div style="flex:1"><div class="fr-text">${frT}</div><div class="ko-text">${koT}</div></div>
                     <div class="badge-container">
-                        ${(isKo?item.out_file:item.in_file) ? `<span class="badge badge-native">🇫🇷 ${langData[currentLang].human}</span>` : `<span class="badge badge-ai">🇫🇷 AI</span>`}
-                        ${(isKo?item.in_file:item.out_file) ? `<span class="badge badge-native">🇰🇷 ${langData[currentLang].human}</span>` : `<span class="badge badge-ai">🇰🇷 AI</span>`}
+                        <span class="badge ${frNative ? 'badge-native' : 'badge-ai'}">FR ${frNative ? langData[currentLang].native : 'AI'}</span>
+                        <span class="badge ${koNative ? 'badge-native' : 'badge-ai'}">KR ${koNative ? langData[currentLang].native : 'AI'}</span>
                     </div>`;
-                card.onclick = () => openModal(frText, koText, isKo?item.out_file:item.in_file, isKo?item.in_file:item.out_file);
+                card.onclick = () => openModal(item, frT, koT);
                 list.appendChild(card);
             });
         }
 
-        function openModal(fr, ko, frF, koF) {
-            currentItem = { frText: fr, koText: ko, frFile: frF, koFile: koF };
+        function openModal(item, fr, ko) {
+            const isKo = /[가-힣]/.test(item.text);
+            currentItem = { frText: fr, koText: ko, frFile: isKo ? item.out_file : item.in_file, koFile: isKo ? item.in_file : item.out_file };
             document.getElementById("modal-text-fr").innerText = fr;
             document.getElementById("modal-text-ko").innerText = ko;
+            
+            document.getElementById("lt-fr").innerText = langData[currentLang].listen;
+            document.getElementById("lt-ko").innerText = langData[currentLang].listen;
+            document.getElementById("ls-fr").innerText = currentItem.frFile ? langData[currentLang].native : langData[currentLang].ai;
+            document.getElementById("ls-ko").innerText = currentItem.koFile ? langData[currentLang].native : langData[currentLang].ai;
+            
+            isLooping = { fr: false, ko: false };
+            document.querySelectorAll('.loop-btn').forEach(b => b.classList.remove('active'));
             document.getElementById("audio-modal").style.display = "flex";
         }
 
-        function closeModal() {
-            document.getElementById("audio-modal").style.display = "none";
-            if (window.currentAudio) window.currentAudio.pause();
-            window.speechSynthesis.cancel();
+        function toggleLoop(lang) {
+            isLooping[lang] = !isLooping[lang];
+            document.getElementById(`loop-${lang}`).classList.toggle("active", isLooping[lang]);
+            if (window.currentAudio) window.currentAudio.loop = isLooping[lang];
+            if (isLooping[lang]) playAudio(lang);
         }
 
         function playAudio(lang) {
@@ -297,15 +309,24 @@
             if (file) {
                 const url = `https://firebasestorage.googleapis.com/v0/b/${STORAGE_BUCKET}/o/${encodeURIComponent(file)}?alt=media`;
                 window.currentAudio = new Audio(url);
-                window.currentAudio.play().catch(() => playTTS(text, lang === 'fr' ? 'fr-FR' : 'ko-KR'));
-            } else {
-                playTTS(text, lang === 'fr' ? 'fr-FR' : 'ko-KR');
-            }
+                window.currentAudio.loop = isLooping[lang];
+                window.currentAudio.play().catch(() => playTTS(text, lang));
+            } else { playTTS(text, lang); }
         }
 
         function playTTS(text, lang) {
             const ut = new SpeechSynthesisUtterance(text);
-            ut.lang = lang; ut.rate = 0.9; window.speechSynthesis.speak(ut);
+            ut.lang = lang === 'fr' ? 'fr-FR' : 'ko-KR';
+            ut.rate = 0.9;
+            ut.onend = () => { if (isLooping[lang]) playTTS(text, lang); };
+            window.speechSynthesis.speak(ut);
+        }
+
+        function closeModal() {
+            document.getElementById("audio-modal").style.display = "none";
+            if (window.currentAudio) { window.currentAudio.pause(); window.currentAudio.loop = false; }
+            window.speechSynthesis.cancel();
+            isLooping = { fr: false, ko: false };
         }
     </script>
 </body>
